@@ -1,8 +1,10 @@
+# run in py3
 # to run
-# python fasta_n_fastq_generator.py --genome_length 1000000 --variants 100 --read_length 150 --num_reads 50000
+# python fasta_n_fastq_generator.py --genome_length 1000000 --variants 100 --read_length 150 --num_reads 50000 --seed 42
 
 import argparse
 import random
+import os
 
 def generate_genome(length):
     # Function to generate a random genome sequence of a specified length
@@ -52,21 +54,39 @@ def embed_variants(seq, num_variants):
 
     return seq, variants  # Returning the modified sequence and the list of variants
 
-def generate_fastq(seq, read_length, num_reads):
-    # Function to generate FASTQ entries
-    fastq_entries = []  # List to store FASTQ entries
-    for _ in range(num_reads):
-        start = random.randint(0, len(seq) - read_length)  # Selecting a random start position for the read
-        read_seq = seq[start:start + read_length]  # Extracting the sequence of the read
-        quality_scores = ''.join([chr(random.randint(33, 73)) for _ in range(read_length)])  # Generating dummy quality scores
-        fastq_entry = f'@read_{start}\n{read_seq}\n+\n{quality_scores}'  # Formatting the FASTQ entry
-        fastq_entries.append(fastq_entry)  # Adding the entry to the list
-    return fastq_entries  # Returning the list of FASTQ entries
+def generate_fragments(seq, fragment_length, num_fragments):
+    fragments = []# List to store FASTQ entries
+    for _ in range(num_fragments):
+        start = random.randint(0, len(seq) - fragment_length) # Selecting a random start position for the read
+        fragment = seq[start:start + fragment_length]  # Extracting the sequence of the read
+        fragments.append(fragment) # Adding the entry to the list
+    return fragments  # Returning the list of FASTQ entries
 
-def write_to_file(filename, content):
-    # Function to write content to a file
-    with open(filename, 'w') as file:
-        file.write(content)  # Writing content to the specified file
+def generate_paired_end_fastq(fragments, read_length):
+    paired_fastq_entries = []
+    for fragment in fragments:
+        if len(fragment) < 2 * read_length:
+            continue
+
+        forward_read = fragment[:read_length]
+        forward_quality_scores = ''.join([chr(random.randint(33, 73)) for _ in range(read_length)])
+
+        reverse_read = reverse_complement(fragment[-read_length:])
+        reverse_quality_scores = ''.join([chr(random.randint(33, 73)) for _ in range(read_length)])
+
+        paired_fastq_entries.append((forward_read, forward_quality_scores, reverse_read, reverse_quality_scores))
+    return paired_fastq_entries
+
+def write_reads_to_separate_files(directory, forward_filename, reverse_filename, paired_fastq_entries):
+    with open(os.path.join(directory, forward_filename), 'w') as forward_file, \
+         open(os.path.join(directory, reverse_filename), 'w') as reverse_file:
+        for i, entry in enumerate(paired_fastq_entries):
+            forward_file.write(f"@read_forward_{i}\n{entry[0]}\n+\n{entry[1]}\n")
+            reverse_file.write(f"@read_reverse_{i}\n{entry[2]}\n+\n{entry[3]}\n")
+
+def write_to_file(directory, filename, content):
+    with open(os.path.join(directory, filename), 'w') as file:
+        file.write(content)
 
 def main():
     # Main function to handle workflow
@@ -76,23 +96,31 @@ def main():
     parser.add_argument('--read_length', type=int, default=100)  # Adding argument for read length
     parser.add_argument('--num_reads', type=int, default=1000)  # Adding argument for number of reads
     parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')  # Adding argument for seed
+
     args = parser.parse_args()  # Parsing the arguments
 
     # Set the random seed for reproducibility
     random.seed(args.seed)  # This line sets the seed
 
+    # Generating the genome with variants
     genome = generate_genome(args.genome_length)  # Generating a random genome
-
     genome_with_variants, variant_details = embed_variants(genome, args.variants)  # Embedding variants into the genome
 
-    fastq_normal = generate_fastq(genome_with_variants, args.read_length, args.num_reads)  # Generating FASTQ for normal reads
-    fastq_reverse_complement = generate_fastq(reverse_complement(genome_with_variants), args.read_length, args.num_reads)  # Generating FASTQ for reverse complement reads
+    # Preparing for paired-end read generation
+    fragment_length = 2 * args.read_length  # Adjust as needed
+    num_fragments = args.num_reads // 2  # Assuming two reads per fragment
 
-    # Writing the generated data to files
-    write_to_file('1e6-100v-150r-50000numr/reference_genome.fa', genome)
-    write_to_file('1e6-100v-150r-50000numr/normal_reads.fastq', '\n'.join(fastq_normal))
-    write_to_file('1e6-100v-150r-50000numr/reverse_complement_reads.fastq', '\n'.join(fastq_reverse_complement))
-    write_to_file('1e6-100v-150r-50000numr/variant_details.txt', '\n'.join(variant_details))
+    fragments = generate_fragments(genome_with_variants, fragment_length, num_fragments)
+    paired_end_reads = generate_paired_end_fastq(fragments, args.read_length)
+
+    # Create output directory
+    output_dir = f"/home/eblake/Documents/making_dna/output_{args.genome_length}_{args.variants}v_{args.read_length}rl_{args.num_reads}rn_{args.seed}s"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Writing the generated data to files in the specified directory
+    write_to_file(output_dir, 'reference_genome.fa', genome)
+    write_to_file(output_dir, 'variant_details.txt', '\n'.join(variant_details))
+    write_reads_to_separate_files(output_dir, 'forward_reads.fastq', 'reverse_reads.fastq', paired_end_reads)
 
 if __name__ == '__main__':
     main()  # Running the main function if the script is executed directly
