@@ -1,4 +1,4 @@
-# artificial_ref-g_n_seq_generator
+# artificial_ref-g_n_seq_generator Description
 This Python script is designed for bioinformatics simulations, specifically to generate mock genomic data. It can create a random genome sequence, introduce various types of genetic variants (such as duplications, insertions, deletions, and translocations), and simulate sequencing reads in FASTQ format.  Key features include:
 
 **Random Genome Generation:** It can generate a genome sequence of specified length composed of random nucleotides (A, C, G, T).
@@ -53,4 +53,102 @@ Script Execution Check (Line 87)
 
 **if __name__ == '__main__': main():** This line checks if the script is being run as the main program and not being imported as a module in another script. If it's the main program, it calls the main() function.
 
+---
+
+### `fasta_n_fastq_generator.py`
+Usage Instructions
+This script can be used in two modes: using a fake (artificially generated) genome or using a real (user-provided) genome.
+
+#### Using an Artificial Genome
+To run the script with an artificially generated genome, use the following command:
+``` shell 
+python fasta_n_fastq_generator.py --genome_using fake --genome_length 1000000 --variants 100 --read_length 150 --num_reads 50000 --seed 42 --output_dir /path/to/output
+```
+##### Parameters:
+**--genome_using fake:** Indicates the use of an artificial genome.
+
+**--genome_length:** The length of the artificial genome to be generated.
+
+Other parameters (--variants, --read_length, --num_reads, --seed, --output_dir) are used for variant embedding, read generation, and output file management.
+
+#### Using a Real Genome
+To run the script with a real genome provided by the user, use the following command:
+```shell
+python fasta_n_fastq_generator.py --genome_using real --real_genome_path /my/path/ref.fa --variants 100 --read_length 150 --num_reads 50000 --seed 42 --output_dir /path/to/output
+```
+##### Parameters:
+
+**--genome_using real:** Indicates the use of a real genome.
+
+**--real_genome_path:** Path to the real genome file.
+
+Other parameters (--variants, --read_length, --num_reads, --seed, --output_dir) are used similarly as in the fake genome mode, but the real genome is used as the base sequence.
+
+Note: In the 'real' mode, the --genome_length parameter is not required as the length will be determined by the provided genome file.
+
+---
+
+### `fasta_to_fa.py`
+
+#### Description
+This script is used to convert a FASTA file to a FA file. It reads a given FASTA file and writes its content into an FA file without making any modifications to the content.
+
+#### Usage
+```bash
+python fasta_to_fa.py <input.fasta> <output.fa>
+```
+
+#### Parameters
+- `input.fasta`: The input file in FASTA format.
+- `output.fa`: The desired output file in FA format.
+
+#### Example
+```bash
+python fasta_to_fa.py input.fasta output.fa
+```
+
+---
+
+### `fastq_to_bam.py`
+
+#### Description
+This script processes sequencing reads by aligning them to a reference genome using BWA, converting the resulting SAM file to a BAM file using Samtools, sorting the BAM file, and indexing it for further analysis.
+
+#### Usage
+```bash
+python fastq_to_bam.py --ref_genome <my.fa> --fastq1 <my1.fastq> --fastq2 <my2.fastq> --output </myoutput>
+```
+
+#### Parameters
+- `--ref_genome`: The reference genome file in FASTA format.
+- `--fastq1`: The first FASTQ file containing sequencing reads.
+- `--fastq2`: The second FASTQ file containing sequencing reads.
+- `--output`: Prefix for the output files (e.g., `/myoutput` for `/myoutput.sam`, `/myoutput.bam`, etc.).
+
+#### Example
+```bash
+python fastq_to_bam.py --ref_genome my.fa --fastq1 my1.fastq --fastq2 my2.fastq --output /myoutput
+```
+
+---
+
+### `indexing_ref_genome.py`
+
+#### Description
+This script is designed for indexing a reference genome. It creates a BWA index of the reference genome and a .fa.fai index file using Samtools. These indices are essential for various bioinformatics analyses that involve the reference genome.
+
+#### Usage
+```bash
+python indexing_ref_genome.py --ref_genome <ref_genome.fa>
+```
+
+#### Parameters
+- `--ref_genome`: The reference genome file in FASTA format that needs to be indexed.
+
+#### Example
+```bash
+python indexing_ref_genome.py --ref_genome ref_genome.fa
+```
+
+---
 
