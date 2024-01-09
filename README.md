@@ -152,3 +152,43 @@ python indexing_ref_genome.py --ref_genome ref_genome.fa
 
 ---
 
+# SAM File Read Summary
+
+This section summarizes key information from the SAM file generated from aligning FASTQ files.
+
+## Table: Alignment Summary
+
+| Read Name | Flag | Reference Sequence Name                                      | Position | Mapping Quality | CIGAR String | RNEXT | PNEXT  | TLEN | Alignment Score (AS) | Number of Mismatches (NM) |
+|-----------|------|--------------------------------------------------------------|----------|-----------------|--------------|-------|--------|------|----------------------|---------------------------|
+| read_0    | 99   | ref_genome_output_fake_1000000_25v_150rl_50000rn_42s         | 475795   | 60              | 150M         | =     | 476095 | 450  | 150                  | 0                         |
+| read_0    | 147  | ref_genome_output_fake_1000000_25v_150rl_50000rn_42s         | 476095   | 60              | 150M         | =     | 475795 | -450 | 150                  | 0                         |
+
+## Explanation of Columns
+
+- **Read Name**: Identifier of the read.
+- **Flag**: Bitwise flag (99 and 147 indicate proper pairing for paired-end reads).
+- **Reference Sequence Name**: The name of the reference sequence where the read aligns.
+- **Position**: The starting position of the alignment on the reference sequence.
+- **Mapping Quality**: The quality score of the alignment (60 is a high score, indicating high confidence).
+- **CIGAR String**: Encodes the alignment (150M means 150 bases matched).
+- **RNEXT**: Reference name of the mate/next read (‘=’ indicates the same chromosome).
+- **PNEXT**: Position of the mate/next read.
+- **TLEN**: Observed Template Length (450 and -450 indicate the size of the DNA fragment; negative value for the reverse strand).
+- **Alignment Score (AS)**: A score indicating how well the read aligns to the reference.
+- **Number of Mismatches (NM)**: The number of mismatches in the alignment.
+
+### Significance of Flags 99 and 147
+In the SAM file, the flags 99 and 147 have specific meanings related to paired-end sequencing:
+
+**Flag 99**: Indicates that the read is part of a read pair (paired-end), it's the first read in the pair (read_1), the read is mapped in a proper pair, and it's mapped to the forward strand.
+
+**Flag 147**: Indicates that the read is part of a read pair, it's the second read in the pair (read_2), the read is mapped in a proper pair, and it's mapped to the reverse strand.
+
+These flags are a bitwise representation of various properties of each read. For example:
+
+**99** in binary is **1100011**, indicating the read is paired, mapped in a proper pair, not unmapped, the first in pair, and not on the reverse strand.
+
+**147** in binary is **10010011**, indicating the read is paired, mapped in a proper pair, not unmapped, the second in pair, and on the reverse strand.
+
+---
+

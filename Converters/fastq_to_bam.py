@@ -6,21 +6,26 @@
 import subprocess
 import argparse
 
-def run_command(command):
+def run_command(command, output_file=None):
     """ Run a shell command """
     try:
-        subprocess.run(command, check=True, shell=True)
+        if output_file:
+            with open(output_file, 'w') as f:
+                subprocess.run(command, check=True, stdout=f)
+        else:
+            subprocess.run(command, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running command: {e}")
         exit(1)
 
+
 def align_reads(ref_genome, fastq_file1, fastq_file2, output_sam):
     """ Align reads to the reference genome """
     print("Aligning reads to the reference genome...")
-    # Include read group information in the bwa mem command
-    rg_string = "@RG\\tID:group1\\tSM:sample1\\tPL:illumina\\tLB:lib1"
-    bwa_command = f"bwa mem -R '{rg_string}' {ref_genome} {fastq_file1} {fastq_file2} > {output_sam}"
-    run_command(bwa_command)
+
+    bwa_command = ['bwa', 'mem', ref_genome, fastq_file1, fastq_file2]
+    run_command(bwa_command, output_sam)
+
 
 def convert_sam_to_bam(sam_file, bam_file):
     """ Convert SAM file to BAM file """

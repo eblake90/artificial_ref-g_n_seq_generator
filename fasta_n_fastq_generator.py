@@ -63,7 +63,7 @@ def generate_fragments(seq, fragment_length, num_fragments):
 def generate_paired_end_fastq(fragments, read_length):
     paired_fastq_entries = []
     for fragment in fragments:
-        if len(fragment) < 2 * read_length:
+        if len(fragment) < read_length:
             continue
 
         forward_read = fragment[:read_length]
