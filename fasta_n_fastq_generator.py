@@ -3,6 +3,7 @@
 import argparse
 import random
 import os
+import numpy as np
 
 def generate_genome(length):
     # Function to generate a random genome sequence of a specified length
@@ -22,28 +23,28 @@ def embed_variants(seq, num_variants):
 
         # Handling duplication variants
         if variant_type == 'duplication':
-            size = random.randint(50, 100)  # Determining the size of the duplication
+            size = random.randint(50, 5000)  # Determining the size of the duplication
             variant_seq = seq[pos:pos+size]  # Extracting the sequence to duplicate
             seq = seq[:pos] + variant_seq + seq[pos:]  # Inserting the duplicated sequence
             variants.append(f'Type: duplication, Location: {pos}, Length: {size}, Sequence: {variant_seq}')  # Recording the variant details
 
         # Handling insertion variants
         elif variant_type == 'insertion':
-            size = random.randint(50, 100)  # Determining the size of the insertion
+            size = random.randint(50, 5000)  # Determining the size of the insertion
             insert_seq = ''.join(random.choice('ACGT') for _ in range(size))  # Generating a random sequence for insertion
             seq = seq[:pos] + insert_seq + seq[pos:]  # Inserting the new sequence
             variants.append(f'Type: insertion, Location: {pos}, Length: {size}, Sequence: {insert_seq}')  # Recording the variant details
 
         # Handling deletion variants
         elif variant_type == 'deletion':
-            size = random.randint(50, 100)  # Determining the size of the deletion
+            size = random.randint(50, 5000)  # Determining the size of the deletion
             del_seq = seq[pos:pos+size]  # Extracting the sequence to be deleted
             seq = seq[:pos] + seq[pos+size:]  # Deleting the specified sequence
             variants.append(f'Type: deletion, Location: {pos}, Length: {size}, Sequence: {del_seq}')  # Recording the variant details
 
         # Handling translocation variants
         elif variant_type == 'translocation':
-            size = random.randint(50, 100)  # Determining the size of the translocation
+            size = random.randint(50, 5000)  # Determining the size of the translocation
             end_pos = random.randint(0, len(seq) - size)  # Selecting a new position for the sequence
             trans_seq = seq[end_pos:end_pos+size]  # Extracting the sequence to translocate
             seq = seq[:pos] + trans_seq + seq[pos:]  # Inserting the translocated sequence
@@ -52,6 +53,7 @@ def embed_variants(seq, num_variants):
 
     return seq, variants  # Returning the modified sequence and the list of variants
 
+"""
 def generate_fragments(seq, fragment_length, num_fragments):
     fragments = []# List to store FASTQ entries
     for _ in range(num_fragments):
@@ -59,6 +61,20 @@ def generate_fragments(seq, fragment_length, num_fragments):
         fragment = seq[start:start + fragment_length]  # Extracting the sequence of the read
         fragments.append(fragment) # Adding the entry to the list
     return fragments  # Returning the list of FASTQ entries
+"""
+
+def generate_fragments(seq, read_length, num_fragments, insert_mean, insert_std):
+    fragments = []
+    for _ in range(num_fragments):
+        insert_size = int(np.random.normal(insert_mean, insert_std))  # Generate insert size from normal distribution
+        fragment_length = 2 * read_length + insert_size  # Calculate total fragment length
+        if fragment_length > len(seq):
+            continue  # Skip if fragment length is longer than sequence length
+        start = random.randint(0, len(seq) - fragment_length) # Selecting a random start position for the read
+        fragment = seq[start:start + fragment_length] # Extracting the sequence of the read
+        fragments.append(fragment) # Adding the entry to the list
+    return fragments # Returning the list of FASTQ entries
+
 
 def generate_paired_end_fastq(fragments, read_length):
     paired_fastq_entries = []
@@ -108,6 +124,8 @@ def main():
 
     # Set the random seed for reproducibility
     random.seed(args.seed)  # This line sets the seed
+    insert_mean = 450  # Mean insert size (adjust as needed)
+    insert_std = 50  # Standard deviation of insert size (adjust as needed)
 
     if args.genome_using == 'fake':
         # Generate artificial genome
@@ -124,7 +142,7 @@ def main():
     fragment_length = 3 * args.read_length  # Adjust as needed
     num_fragments = args.num_reads // 2  # Assuming two reads per fragment #########
 
-    fragments = generate_fragments(genome_with_variants, fragment_length, num_fragments)
+    fragments = generate_fragments(genome_with_variants, args.read_length, num_fragments, insert_mean, insert_std)
     paired_end_reads = generate_paired_end_fastq(fragments, args.read_length)
 
     # Constructing file names based on input arguments
@@ -138,7 +156,7 @@ def main():
 
     # Constructing the header for the reference genome
     genome_header = f">ref_genome_{base_filename}"
-
+your_file.csv
     # Writing the generated data to files in the specified directory
     if args.genome_using == 'fake':
         write_to_file(output_subfolder, f'reference_genome_{base_filename}.fa', genome_header, genome)
@@ -147,3 +165,4 @@ def main():
 
 if __name__ == '__main__':
     main()  # Running the main function if the script is executed directly
+

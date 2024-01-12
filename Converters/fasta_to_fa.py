@@ -21,8 +21,8 @@ def convert_fasta_to_fa(input_file, output_file):
 def main():
     # Set up command line argument parsing.
     parser = argparse.ArgumentParser(description='Convert FASTA file to FA file.')
-    parser.add_argument('input', help='Input FASTA file')
-    parser.add_argument('output', help='Output FA file')
+    parser.add_argument('--input', help='Input FASTA file')
+    parser.add_argument('--output', help='Output FA file')
 
     # Parse the command line arguments.
     args = parser.parse_args()

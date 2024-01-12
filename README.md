@@ -55,7 +55,7 @@ Script Execution Check (Line 87)
 
 ---
 
-### `fasta_n_fastq_generator.py`
+## `fasta_n_fastq_generator.py`
 Usage Instructions
 This script can be used in two modes: using a fake (artificially generated) genome or using a real (user-provided) genome.
 
@@ -88,7 +88,7 @@ Note: In the 'real' mode, the --genome_length parameter is not required as the l
 
 ---
 
-### `fasta_to_fa.py`
+## `fasta_to_fa.py`
 
 #### Description
 This script is used to convert a FASTA file to a FA file. It reads a given FASTA file and writes its content into an FA file without making any modifications to the content.
@@ -109,7 +109,7 @@ python fasta_to_fa.py input.fasta output.fa
 
 ---
 
-### `fastq_to_bam.py`
+## `fastq_to_bam.py`
 
 #### Description
 This script processes sequencing reads by aligning them to a reference genome using BWA, converting the resulting SAM file to a BAM file using Samtools, sorting the BAM file, and indexing it for further analysis.
@@ -132,7 +132,7 @@ python fastq_to_bam.py --ref_genome my.fa --fastq1 my1.fastq --fastq2 my2.fastq 
 
 ---
 
-### `indexing_ref_genome.py`
+## `indexing_ref_genome.py`
 
 #### Description
 This script is designed for indexing a reference genome. It creates a BWA index of the reference genome and a .fa.fai index file using Samtools. These indices are essential for various bioinformatics analyses that involve the reference genome.
