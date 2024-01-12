@@ -156,7 +156,7 @@ def main():
 
     # Constructing the header for the reference genome
     genome_header = f">ref_genome_{base_filename}"
-your_file.csv
+
     # Writing the generated data to files in the specified directory
     if args.genome_using == 'fake':
         write_to_file(output_subfolder, f'reference_genome_{base_filename}.fa', genome_header, genome)
